@@ -8,6 +8,9 @@ import Main from './components/navigation';
 import { useFonts } from 'expo-font';
 import Login from './screens/Login';
 import Register from './screens/Register';
+import RegisterProcess from './screens/RegisterProcess';
+import UploadPhoto from './screens/UploadPhoto';
+import CameraPhoto from './components/camera';
 const Stack = createNativeStackNavigator()
 
 export default function App() {
@@ -29,6 +32,9 @@ export default function App() {
         <Stack.Screen name='Onboarding2' component={Onboarding2} />
         <Stack.Screen name='Login' component={Login} />
         <Stack.Screen name='Register' component={Register} />
+        <Stack.Screen name='RegisterProcess' component={RegisterProcess} />
+        <Stack.Screen name='UploadPhoto' component={UploadPhoto} />
+        <Stack.Screen name='Camera' component={CameraPhoto} />
         <Stack.Screen name='Main' component={Main} />
       </Stack.Navigator>
     </NavigationContainer>

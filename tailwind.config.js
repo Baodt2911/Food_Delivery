@@ -7,7 +7,8 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                bgrButton: '#24C87C'
+                bgrButton: '#24C87C',
+                back: '#F9A84D'
             }
         },
     },
