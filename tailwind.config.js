@@ -8,7 +8,7 @@ module.exports = {
         extend: {
             colors: {
                 bgrButton: '#24C87C',
-                back: '#F9A84D'
+                bgrSearch: '#FEAD1D1A'
             }
         },
     },

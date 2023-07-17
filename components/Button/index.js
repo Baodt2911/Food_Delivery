@@ -1,6 +1,5 @@
 import { View, Text } from 'react-native'
-import ChatIcon from '../../icons/Chat.svg'
-const ButtonChat = ({ focused }) => {
+const Button = ({ focused, icon, title }) => {
     return (
         <View style={{
             paddingHorizontal: 10,
@@ -11,12 +10,12 @@ const ButtonChat = ({ focused }) => {
             alignItems: 'center',
             gap: 10
         }}>
-            <ChatIcon />
+            {icon}
             {
-                focused ? <Text>Chat</Text> : <></>
+                focused ? <Text style={{ fontFamily: 'BentonSans-Medium' }}>{title}</Text> : <></>
             }
         </View >
     )
 }
 
-export default ButtonChat
+export default Button

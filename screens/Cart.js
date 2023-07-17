@@ -1,11 +1,60 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-
+import React, { useContext, useEffect, useState } from 'react'
+import { View, Text, ImageBackground, ScrollView, TouchableOpacity, Image, RefreshControl } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Pattern from '../assets/images/Pattern1.png'
+import Swipeable from '../components/Swipeable'
+import Skeleton from '../components/Skeleton'
+import { AuthContext } from '../context/AuthProvider'
+import { API_URL } from '@env'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 const Cart = () => {
+    const { userInfor: { _id: userId } } = useContext(AuthContext)
+    const [resultsCart, setResultsCart] = useState(null)
+    const [isRefresh, setIsRefresh] = useState(false)
+    const fetchData = async () => {
+        const accessToken = await AsyncStorage.getItem('accessToken')
+        const dataCart = await fetch(API_URL + `data-user/userId/${userId}?type=cart`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }
+        ).then(res => res.json())
+        setResultsCart(dataCart.cart)
+    }
+    useEffect(() => {
+        fetchData()
+    }, [])
     return (
-        <View>
-            <Text>Cart</Text>
-        </View>
+        <SafeAreaView className='flex-1'>
+            <ImageBackground source={Pattern} resizeMode='cover' className='flex-1'>
+                <Text className='font-[BentonSans-Bold] text-2xl ml-[25] mt-5'>Order Detail</Text>
+                <ScrollView className='flex-1 mt-5' refreshControl={
+                    <RefreshControl refreshing={isRefresh} onRefresh={async () => {
+                        setIsRefresh(true)
+                        await fetchData()
+                        setIsRefresh(false)
+                    }} />
+                }
+                    contentContainerStyle={{ paddingHorizontal: 15, rowGap: 30, paddingBottom: 120 }}>
+                    {
+                        !resultsCart ? <View style={{ rowGap: 30 }}>
+                            <Skeleton width={'100%'} height={100} style={{ borderRadius: 24 }} />
+                            <Skeleton width={'100%'} height={100} style={{ borderRadius: 24 }} />
+                            <Skeleton width={'100%'} height={100} style={{ borderRadius: 24 }} />
+                            <Skeleton width={'100%'} height={100} style={{ borderRadius: 24 }} />
+                            <Skeleton width={'100%'} height={100} style={{ borderRadius: 24 }} />
+                        </View> :
+                            resultsCart.length === 0 ? <Text className='font-[BentonSans-Medium]  text-center mt-5 text-[#3B3B3B] opacity-30'>No products!</Text> :
+                                resultsCart.map(data =>
+                                    <Swipeable fetchData={() => fetchData()} id={data.product._id} name={data.product.name} photoURL={data.product.photoURL} restaurant={data.product.restaurant.name} price={data.product.price} quantity={data.quantity} key={data._id} />
+                                )
+                    }
+                </ScrollView>
+            </ImageBackground>
+        </SafeAreaView>
     )
 }
 

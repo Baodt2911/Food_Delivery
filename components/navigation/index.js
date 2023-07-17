@@ -3,46 +3,59 @@ import Home from '../../screens/Home';
 import Profile from '../../screens/Profile';
 import Cart from '../../screens/Cart';
 import Chat from '../../screens/Chat';
-import ButtonHome from '../../assets/theme/ButtonHome';
-import ButtonProfile from '../../assets/theme/ButtonProfile';
-import ButtonCart from '../../assets/theme/ButtonCart';
-import ButtonChat from '../../assets/theme/ButtonChat';
+import Button from '../Button';
+import HomeIcon from '../../assets/icons/Home.svg'
+import ProfileIcon from '../../assets/icons/Profile.svg'
+import CartIcon from '../../assets/icons/Cart.svg'
+import ChatIcon from '../../assets/icons/Chat.svg'
+import { Platform } from 'react-native';
+import ViewMore from '../../screens/ViewMore';
+import { useContext } from 'react';
+import { AuthContext } from '../../context/AuthProvider';
+import RegisterProcess from '../../screens/RegisterProcess';
 const Tab = createBottomTabNavigator()
 const Main = () => {
+    const { userInfor: { isNewUser } } = useContext(AuthContext)
     return (
-        <Tab.Navigator initialRouteName="Home"
-            screenOptions={{
-                headerShown: false,
-                title: '',
-                tabBarStyle: {
-                    position: 'absolute',
-                    bottom: 20,
-                    left: 10,
-                    right: 10,
-                    backgroundColor: '#fff',
-                    borderRadius: 22,
-                    height: 60,
-                    shadowColor: '#f5f5f5',
-                    elevation: 5,
-                    borderColor: 'transparent',
-                    paddingVertical: 10,
-                    paddingHorizontal: 15
-                },
-            }} >
-            <Tab.Screen name="Home" component={Home} options={{
-                tabBarIcon: ({ focused }) => <ButtonHome focused={focused} />,
-            }} />
-            <Tab.Screen name="Profile" component={Profile} options={{
-                tabBarIcon: ({ focused }) => <ButtonProfile focused={focused} />,
-            }}
-            />
-            <Tab.Screen name="Cart" component={Cart} options={{
-                tabBarIcon: ({ focused }) => <ButtonCart focused={focused} />,
-            }} />
-            <Tab.Screen name="Chat" component={Chat} options={{
-                tabBarIcon: ({ focused }) => <ButtonChat focused={focused} />,
-            }} />
-        </Tab.Navigator>
+        <>
+            {
+                isNewUser ? <RegisterProcess /> :
+                    <Tab.Navigator initialRouteName="Home"
+                        screenOptions={{
+                            headerShown: false,
+                            title: '',
+                            tabBarStyle: {
+                                position: 'absolute',
+                                bottom: Platform.OS === 'ios' ? 30 : 20,
+                                left: 10,
+                                right: 10,
+                                backgroundColor: '#fff',
+                                borderRadius: 22,
+                                height: 70,
+                                shadowColor: '#5a6cea66',
+                                elevation: 10,
+                                borderColor: 'transparent',
+                                paddingVertical: Platform.OS === 'ios' ? 35 : 10,
+                                paddingHorizontal: 15,
+                            },
+                        }} >
+                        <Tab.Screen name="Home" component={Home} options={{
+                            tabBarIcon: ({ focused }) => <Button focused={focused} icon={<HomeIcon />} title={'Home'} />,
+                        }} />
+                        <Tab.Screen name="Profile" component={Profile} options={{
+                            tabBarIcon: ({ focused }) => <Button focused={focused} icon={<ProfileIcon />} title={'Profile'} />,
+                        }}
+                        />
+                        <Tab.Screen name="Cart" component={Cart} options={{
+                            tabBarIcon: ({ focused }) => <Button focused={focused} icon={<CartIcon />} title={'Cart'} />,
+                        }} />
+                        <Tab.Screen name="Chat" component={Chat} options={{
+                            tabBarIcon: ({ focused }) => <Button focused={focused} icon={<ChatIcon />} title={'Chat'} />,
+                        }} />
+                        <Tab.Screen name='ViewMore' component={ViewMore} options={{ tabBarButton: () => null }} />
+                    </Tab.Navigator>
+            }
+        </>
     )
 }
 export default Main

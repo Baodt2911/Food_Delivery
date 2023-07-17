@@ -1,26 +1,43 @@
-import React, { useState } from 'react'
-import { View, Text, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native'
+import React, { useState, useEffect, useContext } from 'react'
+import { View, Text, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Keyboard, Dimensions, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '../assets/icons/logo.svg'
 import Pattern from '../assets/images/Pattern.png'
 import MessageIcon from '../assets/icons/Message.svg'
 import LockIcon from '../assets/icons/Lock.svg'
-const Login = () => {
-    const [focusEmail, setFocusEmail] = useState(false)
-    const [focusPassword, setFocusPassword] = useState(false)
+import { AuthContext } from '../context/AuthProvider'
+const Login = ({ navigation }) => {
+    const { login } = useContext(AuthContext)
     const [textEmail, setTextEmail] = useState('')
     const [textPassword, setTextPassword] = useState('')
-    const handleFocusEmail = () => {
-        setFocusEmail(true)
+    const [isEmail, setIsEmail] = useState(false)
+    const [isPassword, setIsPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isKeyboard, setIsKeyboard] = useState(false)
+    const onLogin = async () => {
+        setIsLoading(true)
+        await login({ email: textEmail.toLowerCase(), password: textPassword })
+        setIsLoading(false)
     }
-    const handleBlurEmail = () => {
-        setFocusEmail(false)
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+            setIsKeyboard(true)
+        });
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setIsKeyboard(false)
+        });
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
+    }, []);
+    const checkEmail = (text) => {
+        const regexEmail = /^[A-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-z0-9!#$%&'*+/=?^_`{|}~-]+)*@gmail\.com$/;
+        return regexEmail.test(text)
     }
-    const handleFocusPassword = () => {
-        setFocusPassword(true)
-    }
-    const handleBlurPassword = () => {
-        setFocusPassword(false)
+    const checkPassword = (text) => {
+        const regexPassword = /^(?=.*[A-Z])(?=.*[a-zA-Z0-9]).{6,20}$/
+        return regexPassword.test(text)
     }
     return (
         <SafeAreaView className='flex-1 bg-[#ffffff]' >
@@ -29,12 +46,19 @@ const Login = () => {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <ImageBackground className='flex-1' source={Pattern} resizeMode='cover'>
                     {/* Logo */}
-                    <View className=' items-center' style={{ flex: 2 }}>
-                        <Logo />
-                        {/* Name_Logo */}
-                        <Text className=' text-[44px] font-bold  text-[#24C87C]'>FoodNinja</Text>
-                        {/* description_logo */}
-                        <Text className='text-[16px] font-semibold'>Deliever Favorite Food</Text>
+                    <View className=' items-center ' style={{ flex: 2 }}>
+                        {
+                            isKeyboard ? <></> :
+                                <>
+                                    <Logo />
+                                    <View>
+                                        {/* Name_Logo */}
+                                        <Text className='text-center text-[44px] font-bold  text-[#24C87C]'>FoodNinja</Text>
+                                        {/* description_logo */}
+                                        <Text className='text-[16px] font-semibold text-center'>Deliever Favorite Food</Text>
+                                    </View>
+                                </>
+                        }
                     </View>
                     {/* Form_Login */}
                     <View style={{ flex: 4, backgroundColor: '#ffffff' }}>
@@ -44,33 +68,40 @@ const Login = () => {
                             {/* Email */}
                             <View className='flex-row items-center  w-full h-12 gap-x-3 pr-16 font-[BentonSans-Regular]  rounded-[15px]'
                                 style={{
-                                    borderColor: focusEmail ? '#24C87C' : '#f4f4f4', borderWidth: 1, backgroundColor: '#fff',
+                                    borderColor: isEmail ? '#f4f4f4' : textEmail ? 'red' : '#f4f4f4',
+                                    borderWidth: 1,
+                                    backgroundColor: '#fff',
                                     shadowColor: '#5a6cea66',
                                     elevation: 10,
                                 }}>
                                 <MessageIcon width={25} height={25} />
                                 <TextInput className='w-[80%] h-full'
                                     placeholder='Email'
-                                    onChangeText={(text) => setTextEmail(text)}
+                                    onChangeText={(text) => {
+                                        setTextEmail(text)
+                                        checkEmail(text) ? setIsEmail(true) : setIsEmail(false)
+                                    }}
                                     value={textEmail}
-                                    onFocus={handleFocusEmail}
-                                    onBlur={handleBlurEmail}
                                 />
                             </View>
                             {/* Password */}
                             <View className='relative flex-row items-center  w-full h-12 gap-x-3 pr-16 font-[BentonSans-Regular]  rounded-[15px]'
                                 style={{
-                                    borderColor: focusPassword ? '#24C87C' : '#f4f4f4', borderWidth: 1, backgroundColor: '#fff',
+                                    borderColor: isPassword ? '#f4f4f4' : textPassword ? 'red' : '#f4f4f4',
+                                    borderWidth: 1,
+                                    backgroundColor: '#fff',
                                     shadowColor: '#5a6cea66',
                                     elevation: 20,
                                 }}>
                                 <LockIcon width={25} height={25} />
                                 <TextInput className='w-[80%] h-full'
                                     placeholder='Password'
-                                    onChangeText={(text) => setTextPassword(text)}
+                                    onChangeText={(text) => {
+                                        setTextPassword(text)
+                                        checkPassword(text) ? setIsPassword(true) : setIsPassword(false)
+                                    }}
                                     value={textPassword}
-                                    onFocus={handleFocusPassword}
-                                    onBlur={handleBlurPassword}
+                                    secureTextEntry={true}
                                 />
                             </View>
                         </View>
@@ -106,16 +137,31 @@ const Login = () => {
                                 </TouchableOpacity>
                             </View>
                             {/* Forgot_Password */}
-                            <TouchableOpacity className='mt-5 mb-6'>
+                            <TouchableOpacity onPress={() => navigation.navigate('Forgot')}
+                                className='mt-5 mb-6'>
                                 <Text className='font-[BentonSans-Medium] text-xs text-[#24C87C] underline'>Forgot Your Password?</Text>
                             </TouchableOpacity>
                             {/* ButtonLogin */}
-                            <TouchableOpacity
-                                className='bg-bgrButton w-[160px] h-[50px] rounded-[15px] justify-center items-center '
-                                style={{ shadowColor: '#24C87C', elevation: 10 }}
-                            >
-                                <Text className='text-white text-[16px] font-[BentonSans-Bold]'>Login</Text>
-                            </TouchableOpacity>
+                            {
+                                isLoading ? <ActivityIndicator color={"#24C87C"} /> :
+                                    <TouchableOpacity onPress={() => onLogin()} disabled={!(isEmail && isPassword)}
+                                        className='bg-bgrButton w-[160px] h-[50px] rounded-[15px] justify-center items-center '
+                                        style={{
+                                            shadowColor: '#24C87C',
+                                            elevation: 10,
+                                            opacity: (isEmail && isPassword) ? 1 : 0.7
+                                        }}
+                                    >
+                                        <Text className='text-white text-[16px] font-[BentonSans-Bold]'>Login</Text>
+                                    </TouchableOpacity>
+                            }
+                            {/* create account */}
+                            <View className='flex-row items-center mt-3'>
+                                <Text className='font-[BentonSans-Medium] text-xs opacity-30'> You aren't have account?</Text>
+                                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                                    <Text className='text-xs underline text-[#24C87C] ml-1 '>Register</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </ImageBackground>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, ImageBackground, Image } from 'react-native'
+import { View, Text, TouchableOpacity, ImageBackground, Image, Alert, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as ImagePicker from 'expo-image-picker';
 import BackIcon from '../assets/icons/back.svg'
@@ -7,13 +7,15 @@ import Pattern from '../assets/images/Pattern1.png'
 import GalleryIcon from '../assets/icons/Gallery.svg'
 import CameraIcon from '../assets/icons/camera.svg'
 import CloseIcon from '../assets/icons/close.svg'
+import { ref, uploadBytes } from 'firebase/storage';
+import { storage } from '../firebase';
 const UploadPhoto = ({ route, navigation }) => {
+    const { phoneNumber, displayName } = route.params
     const [image, setImage] = useState(null)
-    if (route?.params?.image) {
-        useEffect(() => {
-            setImage(route?.params?.image)
-        }, [route?.params?.image])
-    }
+    const [isLoading, setIsLoading] = useState(false)
+    useEffect(() => {
+        setImage(route?.params?.image)
+    }, [route?.params?.image])
     const pickImageAsync = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             allowsEditing: true,
@@ -21,6 +23,24 @@ const UploadPhoto = ({ route, navigation }) => {
         });
         setImage(result.assets[0].uri)
     };
+    const handleUploadPhoto = async () => {
+        setIsLoading(true)
+        try {
+            const res = await fetch(image)
+            const blob = await res.blob()
+            const fileName = image.substring(image.lastIndexOf('/') + 1)
+            const storageRef = ref(storage, `Images_User/${fileName}`)
+            await uploadBytes(storageRef, blob)
+            navigation.navigate('SetLocation', {
+                phoneNumber, displayName,
+                photoURL: `Images_User%2F${fileName}` // "/" to "%2F" url
+            })
+            setIsLoading(false)
+        } catch (error) {
+            Alert.alert('Notification', `${error}`, [{ text: 'OK', onPress: () => { } }])
+            setIsLoading(false)
+        }
+    }
     return (
         <SafeAreaView className='flex-1'>
             <ImageBackground className='flex-1 bg-white' source={Pattern} resizeMode='cover'>
@@ -71,10 +91,13 @@ const UploadPhoto = ({ route, navigation }) => {
                 }
                 {/* Next Button */}
                 <View className=' w-full  items-center absolute bottom-[60] left-0 right-0'>
-                    <TouchableOpacity
-                        className='bg-bgrButton  w-[160] h-[50px] rounded-[15px] justify-center items-center' disabled={!image} style={{ opacity: image ? 1 : 0.5 }}>
-                        <Text className='text-white text-xl font-[BentonSans-Bold] '>Next</Text>
-                    </TouchableOpacity>
+                    {
+                        isLoading ? <ActivityIndicator color='#24C87C' /> :
+                            <TouchableOpacity onPress={handleUploadPhoto}
+                                className='bg-bgrButton  w-[160] h-[50px] rounded-[15px] justify-center items-center' disabled={!image} style={{ opacity: image ? 1 : 0.5 }}>
+                                <Text className='text-white text-xl font-[BentonSans-Bold] '>Next</Text>
+                            </TouchableOpacity>
+                    }
                 </View>
             </ImageBackground>
         </SafeAreaView>

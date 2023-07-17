@@ -1,9 +1,27 @@
-import React from 'react'
-import { View, Text, TextInput, ImageBackground, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { View, Text, TextInput, ImageBackground, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Pattern from '../assets/images/Pattern1.png'
 import BackIcon from '../assets/icons/back.svg'
-const SetLocation = ({ navigation }) => {
+import LocationIcon from '../assets/icons/location.svg'
+const SetLocation = ({ navigation, route }) => {
+    const {  phoneNumber, displayName, photoURL } = route.params
+    const [textAddress, setTextAddress] = useState('')
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const windowHeight = Dimensions.get('window').height
+    const ratioScreen = (keyboardHeight / windowHeight) * 100
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+            setKeyboardHeight(event.endCoordinates.height)
+        });
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyboardHeight(0)
+        });
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
+    }, []);
     return (
         <SafeAreaView className='flex-1'>
             <KeyboardAvoidingView className='flex-1' behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -14,55 +32,48 @@ const SetLocation = ({ navigation }) => {
                     </TouchableOpacity>
                     {/* Title */}
                     <View className='pl-[25px] mr-[86px]  mt-5'>
-                        <Text className='font-[BentonSans-Bold] text-2xl'>Fill in your bio to get started</Text>
+                        <Text className='font-[BentonSans-Bold] text-2xl'>Set Your Location </Text>
                         <Text className='font-[BentonSans-Book] text-xs mt-5'>This data will be displayed in your account profile for security</Text>
                     </View>
-                    {/* Form */}
-                    <View className='gap-y-5 mt-5'>
-                        {/* First Name */}
-                        <View className='mx-4 rounded-3xl' style={{
+                    {/* SetLocation  */}
+                    <View className='mx-5 mt-5 px-3 pt-5 pb-3 bg-[#f4f4f4] h-40 rounded-3xl justify-between'
+                        style={{
                             borderWidth: 1,
                             borderColor: Platform.OS === 'ios' ? '#f4f4f4' : 'transparent',
-                            backgroundColor: '#fff',
-                            shadowColor: '#5a6cea66',
+                            backgroundColor: '#f4f4f4',
+                            shadowColor: '#5a6ceacc',
                             elevation: 30,
                         }}>
-                            <TextInput className='pl-5  h-[60px] font-[BentonSans-Regular]'
-                                placeholder='First Name' />
+                        <View className='flex-row items-center gap-x-4'>
+                            <LocationIcon />
+                            <TextInput className='w-full font-[BentonSans-Bold] text-base'
+                                placeholder='Your Location'
+                                onChangeText={(text) => setTextAddress(text)}
+                            />
                         </View>
-                        {/* Last Name */}
-                        <View className='mx-4 rounded-3xl' style={{
-                            borderWidth: 1,
-                            borderColor: Platform.OS === 'ios' ? '#f4f4f4' : 'transparent',
-                            backgroundColor: '#fff',
-                            shadowColor: '#5a6cea66',
-                            elevation: 30,
-                        }}>
-                            <TextInput className='pl-5  h-[60px] font-[BentonSans-Regular]'
-                                placeholder='Last Name' />
-                        </View>
-                        {/* Phone Number */}
-                        <View className='mx-4 rounded-3xl' style={{
-                            borderWidth: 1,
-                            borderColor: Platform.OS === 'ios' ? '#f4f4f4' : 'transparent',
-                            backgroundColor: '#fff',
-                            shadowColor: '#5a6cea66',
-                            elevation: 30,
-                        }}>
-                            <TextInput className='pl-5  h-[60px] font-[BentonSans-Regular]'
-                                placeholder='Moblie Number' keyboardType='numeric' />
-                        </View>
+                        <TouchableOpacity className=' w-full h-[60] bg-white rounded-2xl justify-center items-center'>
+                            <Text className='font-[BentonSans-Bold]  text-base'>Set Location</Text>
+                        </TouchableOpacity>
                     </View>
                     {/* Next Button */}
-                    <View className=' w-full  items-center absolute bottom-[60] left-0 right-0'>
-                        <TouchableOpacity onPress={() => navigation.navigate('UploadPhoto')}
+                    < View className=' w-full  items-center absolute bottom-[60] left-0 right-0' style={{
+                        bottom: keyboardHeight > 260 ? 20 : 60,
+                        display: ratioScreen > 40 ? 'none' : 'flex'
+                    }}>
+                        <TouchableOpacity disabled={textAddress ? false : true} style={{ opacity: textAddress ? 1 : 0.7 }}
+                            onPress={() => {
+                                navigation.navigate('Success', {
+                                     phoneNumber, displayName, photoURL,
+                                    address: textAddress
+                                })
+                            }}
                             className='bg-bgrButton  w-[160] h-[50px] rounded-[15px] justify-center items-center'>
                             <Text className='text-white text-xl font-[BentonSans-Bold] '>Next</Text>
                         </TouchableOpacity>
                     </View>
                 </ImageBackground>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 }
 
