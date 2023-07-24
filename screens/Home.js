@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react'
-import { View, Text, ImageBackground, TouchableOpacity, ScrollView, RefreshControl, Dimensions } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
+import { View, Text, ImageBackground, TouchableOpacity, ScrollView, RefreshControl, Keyboard } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Pattern from '../assets/images/Pattern1.png'
 import Voucher from '../components/Voucher'
 import Restaurant from '../components/Restaurant'
@@ -10,8 +11,19 @@ import { AuthContext } from '../context/AuthProvider'
 const Home = ({ navigation }) => {
     const [isRefresh, setIsRefresh] = useState(false)
     const [isSearch, setIsSearch] = useState(false)
-    const { userInfor } = useContext(AuthContext)
-    console.log('userInfor: ', userInfor);
+    const { setDisableBottomTab } = useContext(AuthContext)
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+            setDisableBottomTab('none')
+        })
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setDisableBottomTab('flex')
+        })
+        return () => {
+            keyboardDidShowListener.remove()
+            keyboardDidHideListener.remove()
+        }
+    }, [])
     const optionsMenu = {
         title: 'Popular Menu',
         url: 'dishes/popular?limit=30',
@@ -41,17 +53,17 @@ const Home = ({ navigation }) => {
     }
     return (
         <SafeAreaView className='flex-1 '>
-            <ImageBackground source={Pattern} resizeMode='cover'
-                className='flex-1'>
-                {/* Header */}
-                <View style={{ flex: isSearch ? 1 : 2 }}>
-                    <Search handleShowSuggestSearch={(params) => handleShowSuggestSearch(params)} />
-                </View>
-                {/* Content */}
-                <View style={{ flex: 5, display: isSearch ? 'none' : 'flex' }}>
-                    <ScrollView style={{ flex: 1 }} refreshControl={
-                        <RefreshControl refreshing={false} onRefresh={() => setIsRefresh(!isRefresh)} />
-                    }>
+            <KeyboardAwareScrollView className='flex-1' showsVerticalScrollIndicator={false} refreshControl={
+                <RefreshControl refreshing={false} onRefresh={() => setIsRefresh(!isRefresh)} />
+            }>
+                <ImageBackground source={Pattern} resizeMode='cover'
+                    className='flex-1'>
+                    {/* Header */}
+                    <View style={{ flex: isSearch ? 1 : 2 }}>
+                        <Search handleShowSuggestSearch={(params) => handleShowSuggestSearch(params)} />
+                    </View>
+                    {/* Content */}
+                    <View style={{ flex: 5, display: isSearch ? 'none' : 'flex', marginTop: 20 }}>
                         <View className='w-[325] h-[150] mx-auto'>
                             {/*List Voucher */}
                             <Voucher isRefresh={isRefresh} />
@@ -82,9 +94,9 @@ const Home = ({ navigation }) => {
                             {/*List Menu Popular*/}
                             <Menu isRefresh={isRefresh} />
                         </View>
-                    </ScrollView>
-                </View>
-            </ImageBackground>
+                    </View>
+                </ImageBackground>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     )
 }

@@ -28,7 +28,7 @@ const Restaurant = ({ isRefresh }) => {
                         <Skeleton width={150} height={180} style={{ borderRadius: 16 }} />
                         <Skeleton width={150} height={180} style={{ borderRadius: 16 }} />
                     </> :
-                    resultsRestaurants.data.map((data) =>
+                    resultsRestaurants?.data.map((data) =>
                         <CardRestaurant id={data._id} imageURL={data.imageURL} logo={data.logo} name={data.name} rate={data.rate} key={data._id} />
                     )
             }

@@ -15,7 +15,7 @@ import { AuthContext } from '../../context/AuthProvider';
 import RegisterProcess from '../../screens/RegisterProcess';
 const Tab = createBottomTabNavigator()
 const Main = () => {
-    const { userInfor: { isNewUser } } = useContext(AuthContext)
+    const { userInfor: { isNewUser }, disableBottomTab } = useContext(AuthContext)
     return (
         <>
             {
@@ -25,6 +25,7 @@ const Main = () => {
                             headerShown: false,
                             title: '',
                             tabBarStyle: {
+                                display: Platform.OS === 'ios' ? 'flex' : disableBottomTab,
                                 position: 'absolute',
                                 bottom: Platform.OS === 'ios' ? 30 : 20,
                                 left: 10,
@@ -32,11 +33,14 @@ const Main = () => {
                                 backgroundColor: '#fff',
                                 borderRadius: 22,
                                 height: 70,
-                                shadowColor: '#5a6cea66',
-                                elevation: 10,
-                                borderColor: 'transparent',
                                 paddingVertical: Platform.OS === 'ios' ? 35 : 10,
+                                borderColor: 'transparent',
                                 paddingHorizontal: 15,
+                                shadowColor: '#5a6cea66',
+                                shadowOffset: { width: 0, height: -2 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 10,
+                                elevation: 10,
                             },
                         }} >
                         <Tab.Screen name="Home" component={Home} options={{

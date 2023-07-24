@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { View, Text, TextInput, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Keyboard } from 'react-native'
+import { View, Text, TextInput, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Keyboard, ActivityIndicator } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '../assets/icons/logo.svg'
 import Pattern from '../assets/images/Pattern.png'
@@ -15,21 +16,9 @@ const Register = ({ navigation }) => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(true)
     const [isKeepSignIn, setIsKeepSignIn] = useState(false)
     const [isEmailAbout, setIsEmailAbout] = useState(false)
-    const [isKeyboard, setIsKeyboard] = useState(false)
     const [isEmail, setIsEmail] = useState(false)
     const [isPassword, setIsPassword] = useState(false)
-    useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-            setIsKeyboard(true)
-        });
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setIsKeyboard(false)
-        });
-        return () => {
-            keyboardDidShowListener.remove();
-            keyboardDidHideListener.remove();
-        };
-    }, []);
+    const [isLoading, setIsLoading] = useState(false)
     const checkEmail = (text) => {
         const regexEmail = /^[A-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-z0-9!#$%&'*+/=?^_`{|}~-]+)*@gmail\.com$/;
         return regexEmail.test(text)
@@ -44,33 +33,28 @@ const Register = ({ navigation }) => {
     const handleShowConfirmPassword = () => {
         setShowConfirmPassword(!showConfirmPassword)
     }
-    const handleCreateAccount = () => {
-        register({ email: textEmail.toLowerCase(), password: textPassword })
+    const handleCreateAccount = async () => {
+        setIsLoading(true)
+        await register({ email: textEmail.toLowerCase(), password: textPassword })
+        setIsLoading(false)
     }
     return (
         <SafeAreaView className='flex-1 bg-[#ffffff]' >
-            <KeyboardAvoidingView
-                className='flex-1'
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <KeyboardAwareScrollView className='flex-1' showsVerticalScrollIndicator={false}>
                 <ImageBackground className='flex-1' source={Pattern} resizeMode='cover'>
                     {/* Logo */}
                     <View style={{ flex: 2, alignItems: 'center' }}>
-                        {
-                            isKeyboard ? <></> :
-                                <>
-                                    <Logo />
-                                    <View>
-                                        {/* Name_Logo */}
-                                        <Text className='text-center text-[44px] font-bold  text-[#24C87C]'>FoodNinja</Text>
-                                        {/* description_logo */}
-                                        <Text className='text-[16px] font-semibold text-center'>Deliever Favorite Food</Text>
-                                    </View>
-                                </>
-                        }
+                        <Logo />
+                        <View>
+                            {/* Name_Logo */}
+                            <Text className='text-center text-[44px] font-bold  text-[#24C87C]'>FoodNinja</Text>
+                            {/* description_logo */}
+                            <Text className='text-[16px] font-semibold text-center'>Deliever Favorite Food</Text>
+                        </View>
                     </View>
                     {/* Form_Register*/}
                     <View style={{ flex: 4, backgroundColor: '#ffffff' }}>
-                        <Text className='font-[BentonSans-Bold] text-2xl text-center mb-[40px] '>Sign Up For Free </Text>
+                        <Text className='font-[BentonSans-Bold] text-2xl text-center mt-5 mb-[40px] '>Sign Up For Free </Text>
                         {/* Form_Input */}
                         <View className=' px-7  gap-3 '>
                             {/* Email */}
@@ -159,16 +143,19 @@ const Register = ({ navigation }) => {
                                 </TouchableOpacity>
                             </View>
                             {/* ButtonRegister */}
-                            <TouchableOpacity onPress={handleCreateAccount} disabled={!(isEmail && textPassword === textConfirmPassword && isPassword)}
-                                className='bg-bgrButton mt-11 w-[160px] h-[50px] rounded-[15px] justify-center items-center '
-                                style={{
-                                    shadowColor: '#24C87C',
-                                    elevation: 10,
-                                    opacity: !(isEmail && textPassword === textConfirmPassword && isPassword) ? 0.7 : 1
-                                }}
-                            >
-                                <Text className='text-white text-[16px] font-[BentonSans-Bold]'>Create Account</Text>
-                            </TouchableOpacity>
+                            {
+                                isLoading ? <ActivityIndicator color={'#24C87C'} style={{ marginVertical: 20 }} /> :
+                                    <TouchableOpacity onPress={handleCreateAccount} disabled={!(isEmail && textPassword === textConfirmPassword && isPassword)}
+                                        className='bg-bgrButton mt-11 w-[160px] h-[50px] rounded-[15px] justify-center items-center '
+                                        style={{
+                                            shadowColor: '#24C87C',
+                                            elevation: 10,
+                                            opacity: !(isEmail && textPassword === textConfirmPassword && isPassword) ? 0.7 : 1
+                                        }}
+                                    >
+                                        <Text className='text-white text-[16px] font-[BentonSans-Bold]'>Create Account</Text>
+                                    </TouchableOpacity>
+                            }
                             {/* already account? */}
                             <TouchableOpacity className='mt-3' onPress={() => navigation.navigate('Login')}>
                                 <Text className='text-bgrButton underline text-center text-xs font-[BentonSans-Medium]'>already have an account?</Text>
@@ -176,7 +163,7 @@ const Register = ({ navigation }) => {
                         </View>
                     </View>
                 </ImageBackground>
-            </KeyboardAvoidingView>
+            </KeyboardAwareScrollView>
         </SafeAreaView >
     )
 }

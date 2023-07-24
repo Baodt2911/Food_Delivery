@@ -25,7 +25,7 @@ const Menu = ({ isRefresh }) => {
                         <Skeleton width={widthDimension > 375 ? '100%' : 325} height={80} style={{ borderRadius: 16 }} />
                     </View>
                     :
-                    resultsMenu.data.map((data) =>
+                    resultsMenu?.data.map((data) =>
                         <CardMenu id={data._id} name={data.name} restaurant={data?.restaurant[0].name} price={data.price} url={data.photoURL} key={data._id} />
                     )
             }

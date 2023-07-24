@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { View, Text, Image, TextInput, KeyboardAvoidingView, TouchableOpacity, ImageBackground, Keyboard, Dimensions, ActivityIndicator } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, ImageBackground, Keyboard, Dimensions, ActivityIndicator } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '../assets/icons/logo.svg'
 import Pattern from '../assets/images/Pattern.png'
@@ -13,24 +14,11 @@ const Login = ({ navigation }) => {
     const [isEmail, setIsEmail] = useState(false)
     const [isPassword, setIsPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const [isKeyboard, setIsKeyboard] = useState(false)
     const onLogin = async () => {
         setIsLoading(true)
         await login({ email: textEmail.toLowerCase(), password: textPassword })
         setIsLoading(false)
     }
-    useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
-            setIsKeyboard(true)
-        });
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setIsKeyboard(false)
-        });
-        return () => {
-            keyboardDidShowListener.remove();
-            keyboardDidHideListener.remove();
-        };
-    }, []);
     const checkEmail = (text) => {
         const regexEmail = /^[A-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-z0-9!#$%&'*+/=?^_`{|}~-]+)*@gmail\.com$/;
         return regexEmail.test(text)
@@ -41,28 +29,21 @@ const Login = ({ navigation }) => {
     }
     return (
         <SafeAreaView className='flex-1 bg-[#ffffff]' >
-            <KeyboardAvoidingView
-                className='flex-1'
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <KeyboardAwareScrollView className='flex-1' showsVerticalScrollIndicator={false}>
                 <ImageBackground className='flex-1' source={Pattern} resizeMode='cover'>
                     {/* Logo */}
                     <View className=' items-center ' style={{ flex: 2 }}>
-                        {
-                            isKeyboard ? <></> :
-                                <>
-                                    <Logo />
-                                    <View>
-                                        {/* Name_Logo */}
-                                        <Text className='text-center text-[44px] font-bold  text-[#24C87C]'>FoodNinja</Text>
-                                        {/* description_logo */}
-                                        <Text className='text-[16px] font-semibold text-center'>Deliever Favorite Food</Text>
-                                    </View>
-                                </>
-                        }
+                        <Logo />
+                        <View>
+                            {/* Name_Logo */}
+                            <Text className='text-center text-[44px] font-bold  text-[#24C87C]'>FoodNinja</Text>
+                            {/* description_logo */}
+                            <Text className='text-[16px] font-semibold text-center'>Deliever Favorite Food</Text>
+                        </View>
                     </View>
                     {/* Form_Login */}
                     <View style={{ flex: 4, backgroundColor: '#ffffff' }}>
-                        <Text className='font-[BentonSans-Bold] text-2xl text-center mb-[40px] '>Login To Your Account</Text>
+                        <Text className='font-[BentonSans-Bold] text-2xl text-center mb-[40px] mt-5'>Login To Your Account</Text>
                         {/* Form_Input */}
                         <View className=' px-7  gap-3 '>
                             {/* Email */}
@@ -137,7 +118,7 @@ const Login = ({ navigation }) => {
                                 </TouchableOpacity>
                             </View>
                             {/* Forgot_Password */}
-                            <TouchableOpacity onPress={() => navigation.navigate('Forgot')}
+                            <TouchableOpacity onPress={() => navigation.navigate('ViaMethodForgotPassword')}
                                 className='mt-5 mb-6'>
                                 <Text className='font-[BentonSans-Medium] text-xs text-[#24C87C] underline'>Forgot Your Password?</Text>
                             </TouchableOpacity>
@@ -165,7 +146,7 @@ const Login = ({ navigation }) => {
                         </View>
                     </View>
                 </ImageBackground>
-            </KeyboardAvoidingView>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     )
 }

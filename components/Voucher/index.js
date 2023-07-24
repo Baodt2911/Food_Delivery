@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ScrollView } from "react-native"
+import { Platform, ScrollView, View } from "react-native"
 import Skeleton from "../Skeleton"
 import CardVoucher from "../CardVoucher"
 import { API_URL } from '@env'
@@ -18,16 +18,18 @@ const Voucher = ({ isRefresh }) => {
         <ScrollView style={{ flex: 1 }}
             horizontal={true}
             pagingEnabled={true}
-            decelerationRate={1}
+            decelerationRate={Platform.OS === 'ios' ? 0 : 1}
             snapToAlignment="start"
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ columnGap: 20 }}
+            contentContainerStyle={{
+                columnGap: Platform.OS === 'ios' ? 0 : 20,
+            }}
         >
             {/* Item Voucher */}
             {
                 !resultsVoucher ? <Skeleton width={325} height={'100%'} style={{ borderRadius: 12 }} /> :
-                    resultsVoucher.data.map(data =>
-                        <CardVoucher url={data.photoURL} key={data._id} />
+                    resultsVoucher?.data.map(data =>
+                        <CardVoucher id={data._id} url={data.photoURL} key={data._id} />
                     )
             }
         </ScrollView>

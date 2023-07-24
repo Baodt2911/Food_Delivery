@@ -3,10 +3,12 @@ import { View, Text, Image, ImageBackground, TouchableOpacity } from 'react-nati
 import Mask from '../../assets/images/Mask.png'
 import Default_LOGO from '../../assets/icons/dish.png'
 import { URL_IMAGE } from '@env'
+import { useNavigation } from '@react-navigation/native'
 
-const CardVoucher = ({ _id, url }) => {
+const CardVoucher = ({ id, url }) => {
+    const navigation = useNavigation()
     return (
-        <ImageBackground source={Mask} resizeMode='cover' className='w-[325] h-full bg-bgrButton rounded-xl flex-row'>
+        <ImageBackground source={Mask} resizeMode='cover' className=' w-[325] h-full bg-bgrButton rounded-xl flex-row'>
             {/* Image Dishes */}
             <View className='flex-1 justify-center items-center '>
                 <Image className='w-[100] h-[100] rounded-full'
@@ -15,7 +17,8 @@ const CardVoucher = ({ _id, url }) => {
             {/* Title Dishes */}
             <View className='flex-1  pr-2 justify-center items-start gap-y-3'>
                 <Text className='text-lg font-[BentonSans-Bold] text-white'>Special Deal For October</Text>
-                <TouchableOpacity className='bg-white rounded-lg w-[80] h-[32] items-center justify-center'>
+                <TouchableOpacity onPress={() => navigation.navigate('Detail', { id, type: 'dishes', photoURL: url })}
+                    className='bg-white rounded-lg w-[80] h-[32] items-center justify-center'>
                     <Text className='text-xs font-[BentonSans-Bold] text-bgrButton'>Buy Now</Text>
                 </TouchableOpacity>
             </View>

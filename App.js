@@ -14,12 +14,17 @@ import CameraPhoto from './components/camera';
 import SetLocation from './screens/SetLocation';
 import RegisterSuccess from './screens/RegisterSuccess';
 import VerificationCode from './screens/VerificationCode';
-import ForgotPassword from './screens/ForgotPassword';
 import ResetPassword from './screens/ResetPassword';
 import ResetPasswordSuccess from './screens/ResetPasswordSuccess';
 import Detail from './screens/Detail';
 import Notification from './screens/Notification';
 import { AuthProvider } from './context/AuthProvider';
+import Payment from './screens/Payment';
+import ViaMethodForgotPassword from './screens/ViaMethod-forgotPassword';
+import ForgotPassword from './screens/ForgotPassword';
+import FinishOrder from './screens/FinishOrder';
+import RateFood from './screens/RateFood';
+import RateRestaurant from './screens/RateRestaurant';
 const Stack = createNativeStackNavigator()
 
 export default function App() {
@@ -34,27 +39,37 @@ export default function App() {
   if (!fontsLoaded) {
     return null;
   }
+  const StackNavigation = () => {
+    return (
+      <Stack.Navigator initialRouteName='Onboarding1' screenOptions={{ headerShown: false }}>
+        <Stack.Screen name='Onboarding1' component={Onboarding1} />
+        <Stack.Screen name='Onboarding2' component={Onboarding2} />
+        <Stack.Screen name='Login' component={Login} />
+        <Stack.Screen name='ViaMethodForgotPassword' component={ViaMethodForgotPassword} />
+        <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
+        <Stack.Screen name='Verification' component={VerificationCode} />
+        <Stack.Screen name='ResetPassword' component={ResetPassword} />
+        <Stack.Screen name='ResetPasswordSuccess' component={ResetPasswordSuccess} />
+        <Stack.Screen name='Register' component={Register} />
+        <Stack.Screen name='RegisterProcess' component={RegisterProcess} />
+        <Stack.Screen name='UploadPhoto' component={UploadPhoto} />
+        <Stack.Screen name='Camera' component={CameraPhoto} />
+        <Stack.Screen name='SetLocation' component={SetLocation} />
+        <Stack.Screen name='Success' component={RegisterSuccess} />
+        <Stack.Screen name='Main' component={Main} />
+        <Stack.Screen name='Notification' component={Notification} />
+        <Stack.Screen name='Detail' component={Detail} />
+        <Stack.Screen name='Payment' component={Payment} />
+        <Stack.Screen name='FinishOrder' component={FinishOrder} />
+        <Stack.Screen name='RateFood' component={RateFood} />
+        <Stack.Screen name='RateRestaurant' component={RateRestaurant} />
+      </Stack.Navigator>
+    )
+  }
   return (
     <NavigationContainer>
       <AuthProvider>
-        <Stack.Navigator initialRouteName='Onboarding1' screenOptions={{ headerShown: false }}>
-          <Stack.Screen name='Onboarding1' component={Onboarding1} />
-          <Stack.Screen name='Onboarding2' component={Onboarding2} />
-          <Stack.Screen name='Login' component={Login} />
-          <Stack.Screen name='Forgot' component={ForgotPassword} />
-          <Stack.Screen name='Verification' component={VerificationCode} />
-          <Stack.Screen name='ResetPassword' component={ResetPassword} />
-          <Stack.Screen name='ResetPasswordSuccess' component={ResetPasswordSuccess} />
-          <Stack.Screen name='Register' component={Register} />
-          <Stack.Screen name='RegisterProcess' component={RegisterProcess} />
-          <Stack.Screen name='UploadPhoto' component={UploadPhoto} />
-          <Stack.Screen name='Camera' component={CameraPhoto} />
-          <Stack.Screen name='SetLocation' component={SetLocation} />
-          <Stack.Screen name='Success' component={RegisterSuccess} />
-          <Stack.Screen name='Main' component={Main} />
-          <Stack.Screen name='Notification' component={Notification} />
-          <Stack.Screen name='Detail' component={Detail} />
-        </Stack.Navigator>
+        <StackNavigation />
       </AuthProvider>
     </NavigationContainer>
   );

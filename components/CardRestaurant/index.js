@@ -11,15 +11,16 @@ const CardRestaurant = ({ logo, name, rate, id, style, imageURL }) => {
             className='w-[150] h-[180] bg-white rounded-2xl items-center justify-center' style={style}>
             <Image className='w-20 h-20'
                 source={logo ? { uri: URL_IMAGE + logo + '?alt=media' } : Default_LOGO} resizeMode='contain' />
-            <View className='mt-4 '>
-                <Text className='font-[BentonSans-Bold] leading-4 text-center'>{name}</Text>
+            <View className='mt-4 px-2'>
+                <Text className='font-[BentonSans-Bold] leading-4 text-center' numberOfLines={1}>{name}</Text>
                 {/* Rate */}
                 <View className='flex-row items-center mt-1 gap-x-1 justify-center'>
-                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' />
-                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' />
-                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' />
-                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' />
-                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' />
+                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' style={{ opacity: rate < 1 ? 0.3 : 1 }} />
+                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' style={{ opacity: rate < 2 ? 0.3 : 1 }} />
+                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' style={{ opacity: rate < 3 ? 0.3 : 1 }} />
+                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4' style={{ opacity: rate < 4 ? 0.3 : 1 }} />
+                    <Image source={STAR_ICON} resizeMode='contain' className='w-4 h-4'
+                        style={{ opacity: rate < 5 ? 0.3 : 1 }} />
                 </View>
             </View>
         </TouchableOpacity>

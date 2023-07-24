@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, Platform, Dimensions, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Platform, Dimensions, ScrollView, ActivityIndicator, Modal } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import NOTIFICATION_ICON from '../../assets/icons/notification.svg'
 import SEARCH_ICON from '../../assets/icons/search.svg'
@@ -13,10 +13,15 @@ const Search = ({ handleShowSuggestSearch }) => {
     const [textSearch, setTextSearch] = useState('')
     const [dataSuggest, setDataSuggest] = useState(null)
     const [isMore, setIsMore] = useState(false)
+    const [isVisible, setIsVisible] = useState(false)
+    const [type, setType] = useState('dishes')
     const searchRef = useRef()
     useEffect(() => {
+        if (!textSearch) {
+            handleShowSuggestSearch(false)
+        }
         const fetchData = async () => {
-            const existingSuggest = await fetch(API_URL + `dishes/search?order=suggest&q=${textSearch}`).then(res => res.json())
+            const existingSuggest = await fetch(API_URL + `${type}/search?order=suggest&q=${textSearch}`).then(res => res.json())
             setDataSuggest(existingSuggest)
         }
         if (textSearch) {
@@ -26,7 +31,7 @@ const Search = ({ handleShowSuggestSearch }) => {
     const handleSearch = () => {
         const options = {
             title: `Results for: ${textSearch}`,
-            url: `dishes/search?q=${textSearch}`,
+            url: `${type}/search?q=${textSearch}`,
             style: {
                 width: widthDimension > 375 ? '100%' : 325,
                 height: 80,
@@ -49,7 +54,7 @@ const Search = ({ handleShowSuggestSearch }) => {
                     <Text className='font-[BentonSans-Bold] text-3xl'>Find Your Favorite Food</Text>
                 </View>
                 {/* btn notification */}
-                <TouchableOpacity onPress={() => navigation.navigate('Notification')}
+                <TouchableOpacity onPress={() => { navigation.navigate('Notification') }}
                     className='relative bg-[#ffffff] w-[45] h-[45] items-center justify-center rounded-2xl' style={{
                         borderWidth: 1,
                         borderColor: Platform.OS === 'ios' ? '#f4f4f4' : 'transparent',
@@ -67,7 +72,7 @@ const Search = ({ handleShowSuggestSearch }) => {
                     <SEARCH_ICON />
                     <TextInput className='pl-3 font-[Roboto-Regular] h-full'
                         style={{
-                            maxWidth: widthDimension > 375 ? '75%' : '70%'
+                            maxWidth: widthDimension * 0.5
                         }}
                         placeholder='What do you want to order?'
                         onChangeText={text => {
@@ -93,9 +98,51 @@ const Search = ({ handleShowSuggestSearch }) => {
                     }
                 </View>
                 {/* Filter btn */}
-                <TouchableOpacity className='bg-bgrSearch w-[50] h-[50] ml-3 rounded-xl items-center justify-center'>
+                <TouchableOpacity onPress={() => setIsVisible(!isVisible)}
+                    className='bg-bgrSearch w-[50] h-[50] ml-3 rounded-xl items-center justify-center'>
                     <FILTER_ICON />
                 </TouchableOpacity>
+                {/* Card select filter */}
+                <Modal
+                    transparent={true}
+                    visible={isVisible}
+                    onRequestClose={() => setIsVisible(!isVisible)}
+                >
+                    <View className='flex-1 justify-center items-center bg-[#3b3b3b4d]'>
+                        <View style={{
+                            width: widthDimension * 0.5,
+                            height: 100,
+                            borderRadius: 10,
+                            backgroundColor: '#FEAD1D',
+                            shadowColor: '#f5f5f5',
+                            shadowOpacity: 0.3,
+                            shadowRadius: 5,
+                            shadowOffset: { width: 0, height: 0 },
+                            elevation: 5
+                        }}>
+                            <View className='justify-center items-center  py-2' >
+                                <Text className='font-[BentonSans-Bold] text-white'>Select type search</Text>
+                            </View>
+                            <View className='bg-[#f5f5f5cc] flex-1' style={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
+                                <TouchableOpacity onPress={() => {
+                                    setType('dishes')
+                                    setIsVisible(false)
+                                }}
+                                    className='flex-1 pl-7 justify-center border-b border-[#f5f5f5cc]' >
+                                    <Text className='font-[BentonSans-Medium] '
+                                        style={{ color: type === 'dishes' ? "red" : '#3b3b3b' }} >Menu</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => {
+                                    setType('restaurants')
+                                    setIsVisible(false)
+                                }}
+                                    className='flex-1 pl-7 justify-center '>
+                                    <Text className='font-[BentonSans-Medium]' style={{ color: type === 'restaurants' ? "red" : '#3b3b3b' }}>Restaurant</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </View>
             {
                 /* Suggest */

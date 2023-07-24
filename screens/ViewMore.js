@@ -1,21 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { View, Text, FlatList, ImageBackground, RefreshControl } from 'react-native'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { View, Text, FlatList, ImageBackground, RefreshControl, TouchableOpacity } from 'react-native'
 import { API_URL } from '@env'
 import Pattern from '../assets/images/Pattern1.png'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Search from '../components/Search'
 import CardMenu from '../components/CardMenu'
 import CardRestaurant from '../components/CardRestaurant'
 import Skeleton from '../components/Skeleton'
-const ViewMore = ({ route }) => {
+import BackIcon from '../assets/icons/back.svg'
+const ViewMore = ({ route, navigation }) => {
     const { contentContainerStyle, style, url, numColumns, title } = route?.params
     const [data, setData] = useState(null)
     const [isRefresh, setIsRefresh] = useState(false)
-    const [isSearch, setIsSearch] = useState(false)
     const fetchData = async () => {
+        setData(null)
         const existingData = await fetch(API_URL + url).then(res => res.json())
         setData(existingData)
-        setIsSearch(false)
     }
     useEffect(() => {
         setData(null)
@@ -25,9 +24,6 @@ const ViewMore = ({ route }) => {
         setIsRefresh(true)
         await fetchData()
         setIsRefresh(false)
-    }
-    const handleShowSuggestSearch = (params) => {
-        setIsSearch(params)
     }
     const onRender = useCallback(({ item, index }) => {
         if (!item?.restaurant) {
@@ -58,16 +54,24 @@ const ViewMore = ({ route }) => {
         <SafeAreaView className='flex-1'>
             <ImageBackground source={Pattern} resizeMode='cover'
                 className='flex-1'>
-                {/* Header */}
-                <View style={{ flex: isSearch ? 1 : 2 }}>
-                    <Search handleShowSuggestSearch={(params) => handleShowSuggestSearch(params)} />
-                </View>
                 {/* Content */}
-                <View style={{ flex: 5, display: isSearch ? 'none' : 'flex' }} className='mx-5' >
+                <TouchableOpacity onPress={() => navigation.goBack()}
+                    className='w-11 h-11 rounded-2xl bg-[#FFF6EF] items-center justify-center mt-10 ml-6' style={{
+                        shadowColor: '#333',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 1,
+                        elevation: 1
+                    }}>
+                    <BackIcon />
+                </TouchableOpacity>
+                <View className='flex-1 mt-5 mx-5' >
                     <Text className='font-[BentonSans-Bold] text-base mb-5'>{title}</Text>
                     {
                         !data ?
                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', rowGap: 20, columnGap: 20 }}>
+                                <Skeleton width={style.width} height={style.height} style={{ borderRadius: 16 }} />
+                                <Skeleton width={style.width} height={style.height} style={{ borderRadius: 16 }} />
                                 <Skeleton width={style.width} height={style.height} style={{ borderRadius: 16 }} />
                                 <Skeleton width={style.width} height={style.height} style={{ borderRadius: 16 }} />
                                 <Skeleton width={style.width} height={style.height} style={{ borderRadius: 16 }} />

@@ -12,7 +12,13 @@ const Notification = ({ navigation }) => {
         <SafeAreaView className='flex-1'>
             <ImageBackground className='flex-1 bg-white' source={Pattern} resizeMode='cover'>
                 <TouchableOpacity onPress={() => navigation.goBack()}
-                    className='w-11 h-11 rounded-2xl bg-[#FFF6EF] items-center justify-center mt-10 ml-6' style={{ elevation: 1 }}>
+                    className='w-11 h-11 rounded-2xl bg-[#FFF6EF] items-center justify-center mt-10 ml-6' style={{
+                        shadowColor: '#333',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 1,
+                        elevation: 1
+                    }}>
                     <BackIcon />
                 </TouchableOpacity>
                 {/* Title */}
@@ -28,11 +34,11 @@ const Notification = ({ navigation }) => {
                         shadowColor: '#5a6ceacc',
                         elevation: 10,
                         paddingHorizontal: 25,
-                        columnGap: 20,
+                        columnGap: 10,
                     }}>
                         <CHECKED_ICON />
                         {/* Title */}
-                        <View className='w-[250]'>
+                        <View className='w-[230]'>
                             <Text className='font-[BentonSans-Medium] text-base'>Your order has been taken by the driver</Text>
                             {/* Time */}
                             <Text className='font-[BentonSans-Regular] text-[#3B3B3B] opacity-30 mt-1'>Recently</Text>
@@ -45,11 +51,11 @@ const Notification = ({ navigation }) => {
                         shadowColor: '#5a6ceacc',
                         elevation: 10,
                         paddingHorizontal: 25,
-                        columnGap: 20,
+                        columnGap: 10,
                     }}>
                         <MONEY_ICON />
                         {/* Title */}
-                        <View className='w-[250]'>
+                        <View className='w-[230]'>
                             <Text className='font-[BentonSans-Medium] text-base'>YTopup for $100 was successful</Text>
                             {/* Time */}
                             <Text className='font-[BentonSans-Regular] text-[#3B3B3B] opacity-30 mt-1'>10.00 Am</Text>
@@ -62,11 +68,11 @@ const Notification = ({ navigation }) => {
                         shadowColor: '#5a6ceacc',
                         elevation: 10,
                         paddingHorizontal: 25,
-                        columnGap: 20,
+                        columnGap: 10,
                     }}>
                         <X_ICON />
                         {/* Title */}
-                        <View className='w-[250]'>
+                        <View className='w-[230]'>
                             <Text className='font-[BentonSans-Medium] text-base'>Your order has been canceled</Text>
                             {/* Time */}
                             <Text className='font-[BentonSans-Regular] text-[#3B3B3B] opacity-30 mt-1'>22 Juny 2021</Text>

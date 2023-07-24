@@ -1,5 +1,5 @@
-import React, { useContext, useRef } from 'react'
-import { View, Text, PanResponder, Animated, Image, TouchableOpacity } from 'react-native'
+import React, { useContext, useRef, useState } from 'react'
+import { View, Text, PanResponder, Animated, Image, TouchableOpacity, Dimensions } from 'react-native'
 import INCREASE_ICON from '../../assets/icons/increase.svg'
 import DECREASE_ICON from '../../assets/icons/decrease.svg'
 import TRASH_ICON from '../../assets/icons/trash.svg'
@@ -10,7 +10,9 @@ const MIN_TRANSLATE_X = -60
 const MAX_TRANSLATE_X = 0
 const DRAG_THRESHOLD = -20
 const Swipeable = ({ name, restaurant, photoURL, price, quantity, id, fetchData }) => {
-    const { userInfor } = useContext(AuthContext)
+    const widthScreen = Dimensions.get('window').width
+    const { userInfor, checkTokenExpiration, refreshToken } = useContext(AuthContext)
+    const [quantityValue, setQuantityValue] = useState(quantity)
     const translateXValue = useRef(new Animated.Value(0)).current
     const lastGestureDx = useRef(0)
     const panResponder = useRef(
@@ -45,53 +47,76 @@ const Swipeable = ({ name, restaurant, photoURL, price, quantity, id, fetchData 
         }).start()
     }
     const handleIncrement = async () => {
-        const accessToken = await AsyncStorage.getItem('accessToken')
-        await fetch(API_URL + `data-user/add-cart/${userInfor._id}`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({
-                cart: {
-                    product: id
-                }
+        try {
+            setQuantityValue(prev => ++prev)
+            let accessToken = await AsyncStorage.getItem('accessToken')
+            if (!checkTokenExpiration(accessToken)) {
+                accessToken = await refreshToken()
+            }
+            await fetch(API_URL + `data-user/add-cart/${userInfor._id}`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    cart: {
+                        product: id
+                    }
+                })
             })
-        })
-        await fetchData()
+            await fetchData()
+        } catch (error) {
+            console.log('Increment', error);
+        }
     }
     const handleDecrement = async () => {
-        const accessToken = await AsyncStorage.getItem('accessToken')
-        await fetch(API_URL + `data-user/add-cart/${userInfor._id}`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({
-                cart: {
-                    product: id,
-                    quantity: -1
-                }
+        try {
+            setQuantityValue(prev => --prev)
+            let accessToken = await AsyncStorage.getItem('accessToken')
+            if (!checkTokenExpiration(accessToken)) {
+                accessToken = await refreshToken()
+            }
+            await fetch(API_URL + `data-user/add-cart/${userInfor._id}`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    cart: {
+                        product: id,
+                        quantity: -1
+                    }
+                })
             })
-        })
-        await fetchData()
+            await fetchData()
+        } catch (error) {
+            console.log('Decrement', error);
+        }
     }
     const handleDeleteProduct = async () => {
-        const accessToken = await AsyncStorage.getItem('accessToken')
-        await fetch(API_URL + `data-user/remove-product/${userInfor._id}`, {
-            method: 'DELETE',
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({
-                cart: {
-                    product: id
-                }
+        try {
+            let accessToken = await AsyncStorage.getItem('accessToken')
+            if (!checkTokenExpiration(accessToken)) {
+                accessToken = await refreshToken()
+            }
+            await fetch(API_URL + `data-user/remove-product/${userInfor._id}`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    cart: {
+                        product: id
+                    }
+                })
             })
-        })
-        await fetchData()
+            await fetchData()
+        } catch (error) {
+            console.log('delete product', error);
+        }
     }
     return (
         <View className='w-full h-[100]  rounded-3xl bg-white'>
@@ -110,11 +135,11 @@ const Swipeable = ({ name, restaurant, photoURL, price, quantity, id, fetchData 
             >
                 <View className='flex-row items-center flex-grow gap-x-2'>
                     <Image source={{ uri: URL_IMAGE + photoURL + '?alt=media' }} resizeMode='cover' className='w-16 h-16 rounded-2xl' />
-                    <View className=''>
+                    <View style={{ width: widthScreen * 0.3 }}>
                         {/* Dishes name */}
-                        <Text className='font-[BentonSans-Medium]  text-ellipsis' numberOfLines={2}>{name}</Text>
+                        <Text className='font-[BentonSans-Medium] ' numberOfLines={1}>{name}</Text>
                         {/* Restaurant name */}
-                        <Text className='font-[BentonSans-Regular] text-[#3B3B3B] opacity-30'>{restaurant}</Text>
+                        <Text className='font-[BentonSans-Regular] text-[#3B3B3B] opacity-30' numberOfLines={1}>{restaurant}</Text>
                         {/* Price */}
                         <Text className='text-bgrButton text-xl font-[BentonSans-Bold]'>$ {price}</Text>
                     </View>
@@ -122,10 +147,11 @@ const Swipeable = ({ name, restaurant, photoURL, price, quantity, id, fetchData 
                 {/* increase & decrease quantity  */}
                 <View className='flex-row items-center ' style={{ columnGap: 18 }}>
                     {/* Button-decrease */}
-                    <TouchableOpacity onPress={() => handleDecrement()}>
+                    <TouchableOpacity disabled={quantityValue <= 1}
+                        onPress={() => handleDecrement()}>
                         <DECREASE_ICON />
                     </TouchableOpacity>
-                    <Text className='text-base'>{quantity}</Text>
+                    <Text className='text-base'>{quantityValue}</Text>
                     {/* Button-increase */}
                     <TouchableOpacity onPress={() => handleIncrement()}>
                         <INCREASE_ICON />

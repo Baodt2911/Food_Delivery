@@ -25,14 +25,14 @@ const PopularMenuRestaurant = ({ menu, id }) => {
                     <Text className='text-xs font-[BentonSans-Book] text-[#FF7C32]'>View All</Text>
                 </TouchableOpacity>
             </View>
-            <View className='w-full h-[170] pl-[30] '>
+            <View className='w-full h-[190] pl-[20] '>
                 <ScrollView
                     horizontal={true}
                     pagingEnabled={true}
                     decelerationRate='fast'
                     snapToAlignment='start'
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ columnGap: 20, paddingRight: 30 }}
+                    contentContainerStyle={{ columnGap: 20, paddingRight: 30, paddingLeft: 10, paddingVertical: 10 }}
                 >
                     {
                         menu.map(data =>

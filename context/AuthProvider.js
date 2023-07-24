@@ -8,41 +8,54 @@ export const AuthContext = createContext()
 export const AuthProvider = ({ children }) => {
     const navigation = useNavigation()
     const [userInfor, setUserInfor] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [disableBottomTab, setDisableBottomTab] = useState('flex')
     const CheckIsNewDevice = async () => {
         try {
-            // await AsyncStorage.clear()
+            setIsLoading(true)
             const isNewDevice = await AsyncStorage.getItem('isNewDevice')
             if (isNewDevice === null) {
+                setIsLoading(false)
                 await AsyncStorage.setItem('isNewDevice', 'true')
             } else {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Login' }]
-                })
+                setIsLoading(false)
+                // CheckIsloggedIn
+                let user = await AsyncStorage.getItem('userInfor')
+                if (user !== null) {
+                    user = JSON.parse(user)
+                    setUserInfor(user)
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Main' }]
+                    })
+                } else {
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Login' }]
+                    })
+                }
             }
         } catch (error) {
             console.log(error);
         }
     }
-    const CheckIsloggedIn = async () => {
+    const CheckIsRefreshToken = async () => {
         try {
-            let user = await AsyncStorage.getItem('userInfor')
-            if (user !== null) {
-                user = JSON.parse(user)
-                setUserInfor(user)
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Main' }]
-                })
+            const refreshToken = await AsyncStorage.getItem('refreshToken')
+            if (refreshToken) {
+                if (!checkTokenExpiration(refreshToken)) {
+                    await AsyncStorage.removeItem('refreshToken')
+                    await AsyncStorage.removeItem('userInfor')
+                    await AsyncStorage.removeItem('accessToken')
+                }
             }
-
         } catch (error) {
-            console.log(`isLoggedIn ${error}`);
+            console.log(`IsRefreshToken ${error}`);
         }
     }
     useEffect(() => {
+        CheckIsRefreshToken()
         CheckIsNewDevice()
-        CheckIsloggedIn()
     }, [])
     const register = async ({ email, password }) => {
         try {
@@ -54,19 +67,13 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ email, password }),
             }
             const existingUser = await fetch(API_URL + 'auth/register', optionsRegister).then(res => res.json())
-            Alert.alert('Notification', `${existingUser.message}`, [
-                {
-                    text: 'OK',
-                    onPress: () => { }
-                }
-            ])
-            if (existingUser.message === "Register successfully") {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Login' }]
-                })
-            }
+            Alert.alert('Notification', `${existingUser.message}`)
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }]
+            })
         } catch (error) {
+            Alert.alert('Notification', `${error.message}`)
             console.log(`Register ${error}`);
         }
     }
@@ -79,8 +86,11 @@ export const AuthProvider = ({ children }) => {
                 },
                 body: JSON.stringify({ email, password }),
             }
-            const existingUser = await fetch(API_URL + 'auth/login', optionsLogin).then(res => res.json())
-            console.log({ existingUser });
+            const res = await fetch(API_URL + 'auth/login', optionsLogin)
+            const existingUser = await res.json()
+            if (!res.ok) {
+                return Alert.alert('Notification', `${existingUser.message}`)
+            }
             const { accessToken, refreshToken, user } = existingUser
             setUserInfor(user)
             await AsyncStorage.setItem('userInfor', JSON.stringify(user))
@@ -92,14 +102,27 @@ export const AuthProvider = ({ children }) => {
                     routes: [{ name: 'RegisterProcess' }]
                 })
             } else {
-                CheckIsloggedIn()
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Main' }]
+                })
             }
         } catch (error) {
+            Alert.alert('Notification', `${error.message}`)
             console.log(`Login ${error}`);
         }
     }
     const logout = async () => {
         try {
+            const refreshToken = await AsyncStorage.getItem('refreshToken')
+            const optionsLogout = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${refreshToken}`
+                }
+            }
+            await fetch(API_URL + 'auth/logout', optionsLogout)
             await AsyncStorage.removeItem('refreshToken')
             await AsyncStorage.removeItem('accessToken')
             await AsyncStorage.removeItem('userInfor')
@@ -111,21 +134,29 @@ export const AuthProvider = ({ children }) => {
             console.log(`Logout ${error}`);
         }
     }
-    const refreshToken = async (token) => {
+    const refreshToken = async () => {
         try {
+            CheckIsRefreshToken()
+            const refreshToken = await AsyncStorage.getItem('refreshToken')
+            if (!refreshToken) {
+                return navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }]
+                })
+            }
             const optionsRefresh = {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${refreshToken}`
                 }
             }
             const existingToken = await fetch(API_URL + 'auth/refresh', optionsRefresh).then(res => res.json())
-            const { accessToken, refreshToken } = existingToken
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = existingToken
             // Save new accessToken & refreshToken
-            await AsyncStorage.setItem('accessToken', accessToken)
-            await AsyncStorage.setItem('refreshToken', refreshToken)
-            return accessToken
+            await AsyncStorage.setItem('accessToken', newAccessToken)
+            await AsyncStorage.setItem('refreshToken', newRefreshToken)
+            return newAccessToken
         } catch (error) {
             console.log(`RefreshToken ${error}`);
         }
@@ -140,17 +171,21 @@ export const AuthProvider = ({ children }) => {
             return true
         }
     }
-    const updateUserInfor = async ({ phoneNumber, displayName, photoURL, address, _id, token }) => {
+    const updateUserInfor = async ({ data, id }) => {
         try {
+            let accessToken = await AsyncStorage.getItem('accessToken')
+            if (!checkTokenExpiration(accessToken)) {
+                accessToken = await refreshToken()
+            }
             const optionsUpdateUserInfor = {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${accessToken}`
                 },
-                body: JSON.stringify({ phoneNumber, displayName, photoURL, address, isNewUser: false })
+                body: JSON.stringify(data)
             }
-            const existingUser = await fetch(API_URL + `auth/update-profile/${_id}`, optionsUpdateUserInfor).then(res => res.json())
+            const existingUser = await fetch(API_URL + `auth/update-profile/${id}`, optionsUpdateUserInfor).then(res => res.json())
             await AsyncStorage.setItem('userInfor', JSON.stringify(existingUser.data))
             setUserInfor(existingUser.data)
         } catch (error) {
@@ -163,10 +198,12 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         userInfor,
+        refreshToken,
         checkTokenExpiration,
         updateUserInfor,
-        refreshToken
+        disableBottomTab,
+        setDisableBottomTab
     }}>
-        {children}
+        {isLoading ? <ActivityIndicator size={'large'} color={"#24C87C"} style={{ flex: 1 }} /> : children}
     </AuthContext.Provider>
 }

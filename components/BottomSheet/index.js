@@ -59,8 +59,8 @@ const BottomSheet = ({ children }) => {
             ...Platform.select({
                 android: { elevation: 3 },
                 ios: {
-                    shadowColor: '#a8bed2',
-                    shadowOpacity: 1,
+                    shadowColor: '#333',
+                    shadowOpacity: 0.3,
                     shadowRadius: 6,
                     shadowOffset: {
                         width: 2,

@@ -21,7 +21,11 @@ const UploadPhoto = ({ route, navigation }) => {
             allowsEditing: true,
             quality: 1,
         });
-        setImage(result.assets[0].uri)
+        if (!result.canceled) {
+            setImage(result.assets[0].uri)
+        } else {
+            console.log('You did not select any image.');
+        }
     };
     const handleUploadPhoto = async () => {
         setIsLoading(true)
@@ -30,14 +34,17 @@ const UploadPhoto = ({ route, navigation }) => {
             const blob = await res.blob()
             const fileName = image.substring(image.lastIndexOf('/') + 1)
             const storageRef = ref(storage, `Images_User/${fileName}`)
-            await uploadBytes(storageRef, blob)
+            const onUploadPhoto = async () => {
+                await uploadBytes(storageRef, blob)
+            }
             navigation.navigate('SetLocation', {
                 phoneNumber, displayName,
-                photoURL: `Images_User%2F${fileName}` // "/" to "%2F" url
+                photoURL: `Images_User%2F${fileName}`, // "/" to "%2F" url
+                onUploadPhoto: onUploadPhoto
             })
             setIsLoading(false)
         } catch (error) {
-            Alert.alert('Notification', `${error}`, [{ text: 'OK', onPress: () => { } }])
+            Alert.alert('Notification', `${error}`)
             setIsLoading(false)
         }
     }
@@ -46,7 +53,13 @@ const UploadPhoto = ({ route, navigation }) => {
             <ImageBackground className='flex-1 bg-white' source={Pattern} resizeMode='cover'>
                 {/* Back */}
                 <TouchableOpacity onPress={() => navigation.goBack()}
-                    className='w-11 h-11 rounded-2xl bg-[#FFF6EF] items-center justify-center mt-10 ml-6' style={{ elevation: 1 }}>
+                    className='w-11 h-11 rounded-2xl bg-[#FFF6EF] items-center justify-center mt-10 ml-6' style={{
+                        shadowColor: '#333',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 1,
+                        elevation: 1
+                    }}>
                     <BackIcon />
                 </TouchableOpacity>
                 {/* Title */}

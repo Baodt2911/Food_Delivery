@@ -11,11 +11,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "jsEngine": "hermes",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "jsEngine": "jsc"
     },
     "android": {
       "adaptiveIcon": {
@@ -37,6 +39,12 @@
         "expo-camera",
         {
           "cameraPermission": "Allow Food Delivery to access your camera."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Food Delivery to use your location."
         }
       ]
     ]
