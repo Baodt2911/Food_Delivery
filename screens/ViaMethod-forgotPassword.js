@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, KeyboardAvoidingView, ImageBackground, TouchableOpacity, Platform } from 'react-native'
+import { View, Text, KeyboardAvoidingView, ImageBackground, TouchableOpacity, Platform, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Pattern from '../assets/images/Pattern1.png'
 import BackIcon from '../assets/icons/back.svg'
@@ -38,7 +38,10 @@ const ViaMethodForgotPassword = ({ navigation }) => {
                     {/* Content */}
                     <View className='mx-5'>
                         {/* Verifi SMS */}
-                        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword', { method: 'sms-code' })}
+                        <TouchableOpacity onPress={() => {
+                            // navigation.navigate('ForgotPassword', { method: 'sms-code' })
+                            Alert.alert('Notification', 'Functions in development')
+                        }}
                             className='mt-5 flex-row items-center rounded-2xl h-24 pl-5 gap-x-3' style={
                                 {
                                     borderWidth: 1,
