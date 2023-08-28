@@ -37,7 +37,7 @@ const ViaMethodForgotPassword = ({ navigation }) => {
                     </View>
                     {/* Content */}
                     <View className='mx-5'>
-                        {/* Verifi SMS */}
+                        {/* Verification SMS */}
                         <TouchableOpacity onPress={() => {
                             // navigation.navigate('ForgotPassword', { method: 'sms-code' })
                             Alert.alert('Notification', 'Functions in development')
@@ -58,7 +58,7 @@ const ViaMethodForgotPassword = ({ navigation }) => {
                                 </View>
                             </View>
                         </TouchableOpacity>
-                        {/* Verifi Email */}
+                        {/* Verification Email */}
                         <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword', { method: 'email-code' })}
                             className=' mt-5 flex-row items-center rounded-2xl h-20 pl-5 gap-x-3' style={
                                 {
